@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# TODO Add handling for usernames using cli argument
+# TODO Allow user to break loop with c-c when asked for dmenu input
+# TODO Add more graceful error handling for nonexisting passwords
+
 path=$HOME/.password-store
 passname=$(ls $path | cut -d "." -f 1 | dmenu)
 
