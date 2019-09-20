@@ -1,14 +1,13 @@
 #!/bin/bash
 
-# TODO Add handling for usernames using cli argument
-
+req_field=${1-1}
 path=$HOME/.password-store
 passname=$(ls $path | cut -d '.' -f 1 | dmenu)
 
 function main {
 if [[ $(gpg-connect-agent 'scd getinfo card_list' /bye | grep 'SERIALNO') ]]
 then
-	password=$(gpg --batch --pinentry-mode loopback -d $path/$passname.gpg)
+	password=$(gpg --batch --pinentry-mode loopback -d $path/$passname.gpg | cut -d$'\n' -f $req_field)
 	if [[ $password ]]
 	then
 		type_password $password
@@ -16,7 +15,7 @@ then
 	fi
 fi
 unlock_questions
-password=$(gpg --batch --pinentry-mode loopback --passphrase $passcode -d $path/$passname.gpg)
+password=$(gpg --batch --pinentry-mode loopback --passphrase $passcode -d $path/$passname.gpg | cut -d$'\n' -f $req_field)
 if [[ $password ]]
 then
 	type_password $password
