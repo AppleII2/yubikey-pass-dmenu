@@ -1,36 +1,31 @@
 #!/bin/bash
 
 # TODO Add handling for usernames using cli argument
-# TODO Allow user to break loop with c-c when asked for dmenu input
 # TODO Add more graceful error handling for nonexisting passwords
+# TODO Trying incorrect password fools the cached keys check... Fix this
 
 path=$HOME/.password-store
-passname=$(ls $path | cut -d "." -f 1 | dmenu)
+passname=$(ls $path | cut -d '.' -f 1 | dmenu)
 
-while true ; do
-	if [ ! $passcode ]
+if [[ $(gpg-connect-agent 'scd getinfo card_list' /bye | grep 'SERIALNO') ]]
+then
+	password=$(gpg --batch --pinentry-mode loopback -d $path/$passname.gpg)
+	echo "UNLOCKED CARD DETECTED"
+else
+	echo "NO UNLOCKED CARD DETECTED"
+	if [[ ! $(gpg --card-status | grep 'Serial number') ]]
 	then
-		password=$(gpg --batch --pinentry-mode loopback -d $path/$passname.gpg 2> /tmp/passman-stderror)
-	else
-		password=$(gpg --batch --pinentry-mode loopback --passphrase $passcode -d $path/$passname.gpg 2> /tmp/passman-stderror)
+		echo "NO CARD DETECTED AT ALL"
+		true | dmenu -p 'Insert smartcard and press enter...'
 	fi
-	error=$(</tmp/passman-stderror)
-	echo $error
-	if [[ $error =~ "decryption failed" ]]
-	then
-		if [[ $error =~ "Card not present" ]]
-		then
-			echo "CARD NOT PRESENT"
-			true | dmenu -p "Insert smartcard and press enter..."
-		else
-			echo $error
-		fi
-	elif [[ $error =~ "Sorry, we are in batchmode" ]]
-		then
-			passcode=$(true | dmenu -p "Input passcode")
-	else
-	       echo "str" $password | xte
-	       rm /tmp/passman-stderror
-	       break
-	fi
-done
+
+	for i in {1..3}
+	passcode=$(true | dmenu -p "Input smartcard passcode")
+	password=$(gpg --batch --pinentry-mode loopback --passphrase $passcode -d $path/$passname.gpg)
+fi
+
+if [[ $password ]]
+then
+	echo "PASSWORD GOOD, TYPING"
+	echo "str" $password | xte
+fi
