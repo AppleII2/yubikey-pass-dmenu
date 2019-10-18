@@ -1,7 +1,7 @@
 #!/bin/bash
 
-req_field=${1-1}
-path=$HOME/.password-store
+req_field=${1-1} # Line of password file to type
+path=$HOME/.password-store # Location of password store file
 passname=$(ls $path | cut -d '.' -f 1 | dmenu)
 
 function main {
