@@ -23,4 +23,4 @@ password=$(gpg --batch --pinentry-mode loopback --passphrase $passcode -d $path/
 
 get_pass
 [[ -n $password ]] || exit
-echo "str" $password | xte
+xdotool type --clearmodifiers $password 
