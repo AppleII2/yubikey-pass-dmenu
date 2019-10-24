@@ -5,40 +5,22 @@ path=$HOME/.password-store # Location of password store file
 passname=$(ls $path | cut -d '.' -f 1 | dmenu)
 [[ -n $passname ]] || exit
 
-function main {
+function get_pass {
 # If card present + unlocked or has had incorrect PIN tried
-if [[ $(gpg-connect-agent 'scd getinfo card_list' /bye | grep 'SERIALNO') ]]
+if [[ $(gpg-connect-agent 'scd getinfo card_list' /bye) ]]
 then
+	# Try to get password without providing a passcode
 	password=$(gpg --batch --pinentry-mode loopback -d $path/$passname.gpg | cut -d$'\n' -f $req_field)
-	if [[ $password ]]
-	then
-		type_password $password
-		return
-	fi
+	[[ -z $password ]] || return
 fi
-unlock_questions
+# Prompt for smartcard if needed + get pin
+[[ $(gpg --card-status) ]] || true | dmenu -p 'Insert smartcard and press enter...'
+[[ $(gpg --card-status) ]] || exit
+passcode=$(true | dmenu -p "Input smartcard PIN...")
+# Try to get password with provided PIN 
 password=$(gpg --batch --pinentry-mode loopback --passphrase $passcode -d $path/$passname.gpg | cut -d$'\n' -f $req_field)
-if [[ $password ]]
-then
-	type_password $password
-fi
 }
 
-function unlock_questions {
-	# If card not inserted at all
-	if [[ ! $(gpg --card-status | grep 'Serial number') ]]
-	then
-		true | dmenu -p 'Insert smartcard and press enter...'
-		if [[ ! $(gpg --card-status | grep 'Serial number') ]]
-		then
-			exit
-		fi
-	fi
-	passcode=$(true | dmenu -p "Input smartcard passcode")
-}
-
-function type_password {
-	echo "str" $1 | xte
-}
-
-main
+get_pass
+[[ -n $password ]] || exit
+echo "str" $password | xte
