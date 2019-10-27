@@ -1,6 +1,14 @@
 #!/bin/bash
 
-req_field=${1-1} # Line of password file to type
+if [[ $1 == "--username" ]]; then
+	req_field=2
+	shift
+else
+	req_field=1
+fi
+
+echo $req_field
+
 path=$HOME/.password-store # Location of password store file
 
 prefix=${PASSWORD_STORE_DIR-~/.password-store}
