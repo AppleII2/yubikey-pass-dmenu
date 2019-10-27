@@ -2,7 +2,14 @@
 
 req_field=${1-1} # Line of password file to type
 path=$HOME/.password-store # Location of password store file
-passname=$(ls $path | cut -d '.' -f 1 | dmenu)
+
+prefix=${PASSWORD_STORE_DIR-~/.password-store}
+password_files=( "$prefix"/**/*.gpg )
+password_files=( "${password_files[@]#"$prefix"/}" )
+password_files=( "${password_files[@]%.gpg}" )
+
+passname=$(printf '%s\n' "${password_files[@]}" | dmenu "$@")
+
 [[ -n $passname ]] || exit
 
 function get_pass {
