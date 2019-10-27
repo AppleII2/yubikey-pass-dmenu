@@ -7,8 +7,6 @@ else
 	req_field=1
 fi
 
-echo $req_field
-
 path=$HOME/.password-store # Location of password store file
 
 prefix=${PASSWORD_STORE_DIR-~/.password-store}
