@@ -23,7 +23,7 @@ function get_pass {
 if [[ $(gpg-connect-agent 'scd getinfo card_list' /bye) ]]
 then
 	# Try to get password without providing a passcode
-	password=$(gpg --batch --pinentry-mode loopback -d $path/$passname.gpg | cut -d$'\n' -f $req_field)
+	password=$(gpg --batch --pinentry-mode loopback -d $path/"$passname.gpg" | cut -d$'\n' -f $req_field)
 	[[ -z $password ]] || return
 fi
 # Prompt for smartcard if needed + get pin
@@ -31,7 +31,7 @@ fi
 [[ $(gpg --card-status) ]] || exit
 passcode=$(true | dmenu -p "Input smartcard PIN...")
 # Try to get password with provided PIN 
-password=$(gpg --batch --pinentry-mode loopback --passphrase $passcode -d $path/$passname.gpg | cut -d$'\n' -f $req_field)
+password=$(gpg --batch --pinentry-mode loopback --passphrase $passcode -d $path/"$passname.gpg" | cut -d$'\n' -f $req_field)
 }
 
 get_pass
