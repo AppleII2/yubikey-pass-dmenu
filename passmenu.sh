@@ -7,16 +7,12 @@ else
 	req_field=1
 fi
 
-path=$HOME/.password-store # Location of password store file
-
 prefix=${PASSWORD_STORE_DIR-~/.password-store}
-
 passname=$(find $prefix -name '*.gpg' -printf '%f\n' | sed 's/\.gpg$//1' | dmenu)
 passpath=$(find $prefix -name $passname.gpg)
 [[ -n $passpath ]] || exit
 
 function get_pass {
-
 # If card present + unlocked or has had incorrect PIN tried
 if [[ $(gpg-connect-agent 'scd getinfo card_list' /bye) ]]
 then
