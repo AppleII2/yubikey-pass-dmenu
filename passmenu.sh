@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [[ $1 == "--username" ]]; then
-	req_field=2
-	shift
+if [[ $1 == "--line" ]]; then
+	req_field=$2
+	shift 2
 else
 	req_field=1
 fi
